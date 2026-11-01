@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "textgate"
+version = "0.1.0"
+description = "Check what a language model wrote against word rules, and measure how often it passes"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "leekwangeun" }]
+dependencies = ["pydantic>=2.7,<3"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11"]
+
+[project.scripts]
+textgate = "textgate.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/textgate"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
