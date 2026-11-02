@@ -4,6 +4,7 @@ A verdict has two scopes. A problem in a line the whole draft depends on (a titl
 unusable. A problem in one item (one scene, one answer) drops only that item, and the app can fill it in from
 its own reviewed text.
 """
+
 from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass, field
 from typing import Any

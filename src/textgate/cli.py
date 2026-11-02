@@ -2,6 +2,7 @@
 
 SPEC is "module:name", a textgate.Spec importable from the folder the command runs in.
 """
+
 import argparse
 import glob
 import importlib

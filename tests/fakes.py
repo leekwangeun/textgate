@@ -1,16 +1,22 @@
 """A tiny app for the tests: a request is a list of item keys, a draft maps each key to a sentence."""
+
 import random
+from collections.abc import Callable
+from typing import Any
 
 from textgate import Forbid, Spec, Verdict, Written, find_forbidden
+
+Request = dict[str, list[str]]
+Draft = dict[str, str]
 
 FORBID = [Forbid(label="무서운 말", patterns=["괴물", r"(?<![가-힣])피가"])]
 
 
-def make_request(r: random.Random) -> dict:
+def make_request(r: random.Random) -> Request:
     return {"keys": r.sample(["A", "B", "C"], 2)}
 
 
-def judge(req: dict, draft: dict) -> Verdict:
+def judge(req: Request, draft: Draft) -> Verdict:
     v = Verdict(checked=list(req["keys"]))
     if not draft.get("title"):
         v.whole.append("title 비어 있음")
@@ -24,17 +30,19 @@ def judge(req: dict, draft: dict) -> Verdict:
 class ScriptedWriter:
     """Hands out the given drafts (or raises the given exceptions) in order."""
 
-    def __init__(self, *results):
+    def __init__(self, *results: str | Exception) -> None:
         self.results = list(results)
 
-    def __call__(self, req: dict) -> Written:
+    def __call__(self, req: Request) -> Written:
         x = self.results.pop(0)
         if isinstance(x, Exception):
             raise x
-        return Written(draft={"title": "제목", **{k: x for k in req["keys"]}}, model="fake", tokens_in=100, tokens_out=50)
+        return Written(
+            draft={"title": "제목", **{k: x for k in req["keys"]}}, model="fake", tokens_in=100, tokens_out=50
+        )
 
 
-def spec(writer, **kwargs) -> Spec:
+def spec(writer: Callable[[Request], Written], **kwargs: Any) -> Spec:
     return Spec(make_request=make_request, write=writer, judge=judge, read_request=dict, read_draft=dict, **kwargs)
 
 

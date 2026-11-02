@@ -3,6 +3,7 @@
 A unit test can say whether the judge is right about a given sentence. Only real drafts can say how often the
 model writes something the judge accepts, why calls fail, how long a draft takes and what it costs.
 """
+
 import json
 import random
 import re
@@ -84,8 +85,10 @@ class Summary:
             self.problems[p.split(":")[0]] += 1
 
     def lines(self, price: tuple[float, float] | None = None) -> list[str]:
-        out = [f"written {self.written}/{self.asked}, usable {self.usable}/{self.written}, "
-               f"items passed {self.items_passed}/{self.items_checked}"]
+        out = [
+            f"written {self.written}/{self.asked}, usable {self.usable}/{self.written}, "
+            f"items passed {self.items_passed}/{self.items_checked}"
+        ]
         if self.failures:
             out.append(f"failed calls: {dict(self.failures.most_common())}")
         if self.seconds:
@@ -102,9 +105,15 @@ class Summary:
         return out
 
 
-def sample(spec: Spec, n: int, out: Path, seed: int = 7,
-           sleep: Callable[[float], None] = time.sleep, clock: Callable[[], float] = time.monotonic,
-           log: Callable[[str], None] = print) -> Summary:
+def sample(
+    spec: Spec,
+    n: int,
+    out: Path,
+    seed: int = 7,
+    sleep: Callable[[float], None] = time.sleep,
+    clock: Callable[[], float] = time.monotonic,
+    log: Callable[[str], None] = print,
+) -> Summary:
     """Ask for n drafts and write one JSON line per draft to out (a folder or a .jsonl file)."""
     if out.suffix != ".jsonl":
         out = out / f"sample-{datetime.now():%Y%m%d-%H%M}.jsonl"
@@ -134,9 +143,20 @@ def sample(spec: Spec, n: int, out: Path, seed: int = 7,
                 s.tokens.append(tokens)
             v = spec.judge(req, w.draft)
             s.add(v)
-            f.write(json.dumps({"request": to_jsonable(req), "draft": to_jsonable(w.draft), "model": w.model,
-                                "seconds": round(seconds, 2), "tokens": tokens, "verdict": v.to_dict()},
-                               ensure_ascii=False) + "\n")
+            f.write(
+                json.dumps(
+                    {
+                        "request": to_jsonable(req),
+                        "draft": to_jsonable(w.draft),
+                        "model": w.model,
+                        "seconds": round(seconds, 2),
+                        "tokens": tokens,
+                        "verdict": v.to_dict(),
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
             f.flush()
             log(f"{i + 1}/{n} {seconds:.1f}s whole={'ok' if v.usable else v.whole} dropped={list(v.items)}")
     log(f"drafts: {out}")

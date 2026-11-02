@@ -3,6 +3,7 @@
 Every model here refuses fields it does not know. A typo in a rule file then stops the program at load time,
 instead of being ignored and quietly leaving a check out.
 """
+
 import re
 import tomllib
 from pathlib import Path
